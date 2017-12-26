@@ -89,8 +89,8 @@ public class MainActivity extends Activity {
 //        BasicRequest();
 
 
-//        //下载请求
-//        Download();
+        //下载请求
+        Download();
 
 //        //上传图片
 //        uploadImage();
