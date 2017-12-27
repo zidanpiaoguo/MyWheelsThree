@@ -2,8 +2,6 @@ package com.lzy.mywheelsthree.ftp;
 
 import android.util.Log;
 
-import com.lzy.mywheelsthree.MainActivity;
-
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
@@ -17,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
-import java.util.UUID;
 
 /**
  * Created by bullet on 2017/12/26.
@@ -80,8 +77,7 @@ public class FTP {
         boolean flag;
         flag = uploadingSingle(singleFile,Name,listener);
         if (flag) {
-            listener.onUploadProgress(FtpConfig.FTP_UPLOAD_SUCCESS, 0,
-                    singleFile);
+            listener.onUploadProgress(FtpConfig.FTP_UPLOAD_SUCCESS, 0, singleFile);
         } else {
             listener.onUploadProgress(FtpConfig.FTP_UPLOAD_FAIL, 0,
                     singleFile);
@@ -102,7 +98,7 @@ public class FTP {
      *            监听器
      * @throws IOException
      */
-    public void uploadMultiFile(LinkedList<File> fileList, String remotePath,
+    public void uploadMultiFile(LinkedList<File> fileList, String remotePath,String name,
                                 UploadProgressListener listener) throws IOException {
 
         // 上传之前初始化
@@ -111,7 +107,7 @@ public class FTP {
         boolean flag;
 
         for (File singleFile : fileList) {
-            flag = uploadingSingle(singleFile,remotePath, listener);
+            flag = uploadingSingle(singleFile,name, listener);
             if (flag) {
                 listener.onUploadProgress(FtpConfig.FTP_UPLOAD_SUCCESS, 0,
                         singleFile);

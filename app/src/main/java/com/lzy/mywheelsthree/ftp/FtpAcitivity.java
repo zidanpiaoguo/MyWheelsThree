@@ -65,6 +65,7 @@ public class FtpAcitivity extends AppCompatActivity {
                         // 上传
                         String location =Environment.getExternalStorageDirectory().getPath()+"/sintel.mp4";
                         File file = new File(location);
+                        //上传的文件名
                         String upname = UUID.randomUUID().toString().replace("-","")+"."+getFileType(location);
 
                         try {
@@ -154,54 +155,38 @@ public class FtpAcitivity extends AppCompatActivity {
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String location = Environment.getExternalStorageDirectory().getPath()+"/sintel.mp4";
-                File file = new File(location);
 
-                Log.d(TAG, "onClick Name : "+file.getName());
-                String s = UUID.randomUUID().toString().replace("-","")+"."+getFileType(location);
-                Log.d(TAG, "onClick UUID: "+s);
-                MyToast.makeText(s);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        // 删除
+                        try {
+
+                            new FTP().deleteSingleFile("/fff/ftpTest.docx",new FTP.DeleteFileProgressListener(){
+
+                                @Override
+                                public void onDeleteProgress(String currentStep) {
+                                    Log.d(TAG, currentStep);
+                                    if(currentStep.equals(FtpConfig.FTP_DELETEFILE_SUCCESS)){
+                                        Log.d(TAG, "-----shanchu--success");
+                                    } else if(currentStep.equals(FtpConfig.FTP_DELETEFILE_FAIL)){
+                                        Log.d(TAG, "-----shanchu--fail");
+                                    }
+                                }
+
+                            });
+
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+
+                    }
+                }).start();
+
             }
         });
-
-
-
-//
-//        buttonDelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        // 删除
-//                        try {
-//
-//                            new FTP().deleteSingleFile("/fff/ftpTest.docx",new FTP.DeleteFileProgressListener(){
-//
-//                                @Override
-//                                public void onDeleteProgress(String currentStep) {
-//                                    Log.d(TAG, currentStep);
-//                                    if(currentStep.equals(FtpConfig.FTP_DELETEFILE_SUCCESS)){
-//                                        Log.d(TAG, "-----shanchu--success");
-//                                    } else if(currentStep.equals(FtpConfig.FTP_DELETEFILE_FAIL)){
-//                                        Log.d(TAG, "-----shanchu--fail");
-//                                    }
-//                                }
-//
-//                            });
-//
-//                        } catch (Exception e) {
-//                            // TODO Auto-generated catch block
-//                            e.printStackTrace();
-//                        }
-//
-//                    }
-//                }).start();
-//
-//            }
-//        });
 
     }
 
