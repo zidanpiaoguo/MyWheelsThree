@@ -12,6 +12,7 @@ import java.util.Map;
 import io.reactivex.Observable;
 import okhttp3.MultipartBody;
 
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -20,6 +21,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 
@@ -57,14 +59,15 @@ public interface RetrofitService {
     Observable<BaseResult<UploadImage>> uploadPortrait(@Part List<MultipartBody.Part> partList);
 
 
+    //这种上传字符,会自动加双引号
     @Multipart
     @POST("index.php?app=upload&act=portrait")
     Observable<BaseResult<String>> setHead(@Part("user_id") int id,@Part List<MultipartBody.Part> partList);
 
 
-
+    //这种就不会含有双引号
     @Multipart
     @POST("index.php?app=upload&act=auth_image")
-    Observable<BaseObserver<Attestation>> Attestation(@Part("user_id") int id,@Part List<MultipartBody.Part> partList);
+    Observable<BaseResult<Attestation>> Attestation(@PartMap Map<String, RequestBody> map, @Part List<MultipartBody.Part> partList);
 
 }

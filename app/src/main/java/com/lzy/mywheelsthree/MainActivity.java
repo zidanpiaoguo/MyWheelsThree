@@ -2,7 +2,8 @@ package com.lzy.mywheelsthree;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.graphics.Bitmap;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -17,12 +18,11 @@ import com.lzy.mywheelsthree.http.RetrofitFactory;
 import com.lzy.mywheelsthree.http2.BaseObserver2;
 import com.lzy.mywheelsthree.http2.Network2;
 import com.lzy.mywheelsthree.http2.RetrofitFactory2;
+import com.lzy.mywheelsthree.model.Attestation;
 import com.lzy.mywheelsthree.model.TokenData;
 import com.lzy.mywheelsthree.model.UploadImage;
 import com.lzy.mywheelsthree.model.UserData;
 import com.lzy.mywheelsthree.model.UserInformation;
-import com.lzy.mywheelsthree.utils.Autils;
-import com.lzy.mywheelsthree.utils.ImageCompression;
 import com.lzy.mywheelsthree.utils.MyToast;
 
 import java.io.File;
@@ -35,7 +35,6 @@ import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -95,6 +94,13 @@ public class MainActivity extends Activity {
 //        //上传图片
 //        uploadImage();
 
+        //上传图片和文字
+//        uploadImageText();
+
+
+    }
+
+    private void uploadImageText() {
         final String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();
         final String fileName = fileDir + "/" + "4.jpg";
 
@@ -107,20 +113,25 @@ public class MainActivity extends Activity {
         builder.addFormDataPart("portrait_image",file.getName(),requestBody);
 
         List<MultipartBody.Part> parts = builder.build().parts();
-        RetrofitFactory.getInstance()
-                .setHead(1,parts)
-                .compose(Network.<BaseResult<String>>compose())
-                .subscribe(new BaseObserver<String>(this) {
-                    @Override
-                    protected void onHandleSuccess(String s) {
 
-                        MyToast.makeText(s);
+        Map<String, RequestBody> map = new HashMap<>();
+        map.put("user_id", RequestBody.create(null, "1"));
+
+
+        RetrofitFactory.getInstance()
+                .Attestation(map,parts)
+                .compose(Network.<BaseResult<Attestation>>compose())
+                .subscribe(new BaseObserver<Attestation>(this) {
+                    @Override
+                    protected void onHandleSuccess(Attestation s) {
+
+                        MyToast.makeText(s.getAuth_image1());
                         Log.d(TAG, "onHandleSuccess: "+s);
                     }
                 });
-//
-
     }
+
+
 
     private void NestRequest() {
         Map<String, Object> map = new HashMap<>();
@@ -238,7 +249,13 @@ public class MainActivity extends Activity {
                     public void onNext(ResponseBody responseBody) {
                         progressDialog.dismiss();
                         Log.d(TAG, "onNext: ");
-                        text.setText("下载成功！");
+                        String dirPath = fileDir + "/" + fileName; //文件需有可读权限
+                        Log.d(TAG, "onResponse: "+dirPath);
+                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+                        //intent.setAction(android.content.Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse("file://" + dirPath), "application/vnd.android.package-archive");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
                     }
 
                     @Override

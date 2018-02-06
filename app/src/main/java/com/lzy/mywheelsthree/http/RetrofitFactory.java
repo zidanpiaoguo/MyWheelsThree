@@ -22,11 +22,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitFactory {
 //    public final static String BASE_URL = "http://10.10.10.158/member/";
 
-    public final static String BASE_URL ="http://chk.emall.co.jp/";
+    public static String BASE_URL = "http://chk.emall.co.jp/";
 
-    private final static  long CONNECT_TIMEOUT = 30;
+    private final static long CONNECT_TIMEOUT = 30;
 
-    public final static   int READ_TIMEOUT=100;
+    public final static int READ_TIMEOUT = 100;
+
 
     //Retrofit是基于OkHttpClient的，可以创建一个OkHttpClient进行一些配置
     private static OkHttpClient httpClient = new OkHttpClient.Builder()
@@ -37,10 +38,13 @@ public class RetrofitFactory {
                 public Response intercept(Chain chain) throws IOException {
 
 //                    //第一种方法
+//                      Request.Builder builder =chain.request().newBuilder();
+//                      builder.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+//                      builder.addHeader("token","123");
 //
                     Request request = chain.request().newBuilder()
 //                            .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                            .addHeader("token","fb38fad89bb0444c97f9e7a671409d48")
+                            .addHeader("token", "fb38fad89bb0444c97f9e7a671409d48")
                             .build();
                     return chain.proceed(request);
                 }
@@ -56,7 +60,7 @@ public class RetrofitFactory {
             .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)  //读取超时
             .build();
 
-    private static RetrofitService retrofitService =new Retrofit.Builder()
+    private static RetrofitService retrofitService = new Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(buildGson()))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -64,16 +68,37 @@ public class RetrofitFactory {
             .build()
             .create(RetrofitService.class);
 
-    public static RetrofitService getInstance(){
+
+    public static RetrofitService getInstance() {
+        return retrofitService;
+    }
+
+
+    /**
+     * 个别有不同url 的
+     *
+     * @param url
+     * @return
+     */
+
+    public static RetrofitService getInstance(String url) {
+        RetrofitService retrofitService = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(buildGson()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .client(httpClient)
+                .build()
+                .create(RetrofitService.class);
         return retrofitService;
     }
 
 
     /**
      * 解决gson 对于空字符，抛出异常的情况
+     *
      * @return
      */
-    private static Gson buildGson(){
+    private static Gson buildGson() {
         return new GsonBuilder().serializeNulls().create();
     }
 }

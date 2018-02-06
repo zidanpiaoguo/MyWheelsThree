@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 public class ProgressInputStream  extends InputStream {
 
-    private static final int TEN_KILOBYTES = 1024 * 10;  //每上传10K返回一次
+    private static final int TEN_KILOBYTES = 1024 * 1024;  //每上传10K返回一次
 
     private InputStream inputStream;
 
