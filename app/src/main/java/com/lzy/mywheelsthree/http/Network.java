@@ -37,7 +37,7 @@ public  class Network {
             public ObservableSource<T> apply(Observable<T> observable) {
                 return observable
                         .subscribeOn(Schedulers.io())
-                        .doOnSubscribe(new Consumer<Disposable>() {
+                        .doOnSubscribe( new Consumer<Disposable>() {
                             @Override
                             public void accept(Disposable disposable) throws Exception {
                                 //     可添加网络连接判断等

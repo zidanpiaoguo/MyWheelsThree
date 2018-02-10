@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 import com.lzy.mywheelsthree.http.BaseDownload;
 import com.lzy.mywheelsthree.http.BaseObserver;
 import com.lzy.mywheelsthree.http.BaseResult;
+import com.lzy.mywheelsthree.http.D;
 import com.lzy.mywheelsthree.http.Network;
 import com.lzy.mywheelsthree.http.RetrofitFactory;
 import com.lzy.mywheelsthree.http2.BaseObserver2;
@@ -35,6 +38,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -87,9 +91,10 @@ public class MainActivity extends Activity {
 //        //一次性请求
 //        BasicRequest();
 
+        Download1();
 
-        //下载请求
-        Download();
+//        //下载请求
+//        Download();
 
 //        //上传图片
 //        uploadImage();
@@ -211,30 +216,111 @@ public class MainActivity extends Activity {
     }
 
 
-    /**
-     * 下载apk
-     * 由于可能需要不同网络环境，对应不同下载情况
-     * 这个就没加网络限制，需要自己外部检查是什么网络
-     */
-    private void Download() {
-        String url = "http://106.14.249.176:8080/app/freebuy.apk";
+
+    private void Download1(){
+
+        String url = "http://47.97.223.94/apk/日本城_1.2.apk";
         final String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-        final String fileName = "bullet_" + "1" + ".apk";
-        progressDialog = new ProgressDialog(this);
+        final String fileName = "bullet" + ".apk";
+
+        progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("下载中...");
         progressDialog.setMax(100);
         progressDialog.show();
 
-
         RetrofitFactory.getInstance()
                 .getDownload(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
+//                .observeOn(Schedulers.computation())//需要
+//                .map(new Function<ResponseBody, File>() {
+//                    @Override
+//                    public File apply(ResponseBody responseBody) throws Exception {
+//                        return null;
+//                    }
+//                })
+                .map(new D(fileDir,fileName) {
+                    @Override
+                    public void inProgress(float progress) {
+                        progressDialog.setProgress((int) (100 * progress));
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<File>() {
+                    @Override
+                    public void accept(File file) throws Exception {
+                        progressDialog.dismiss();
+
+//                        String dirPath = file.getAbsolutePath(); //文件需有可读权限
+                        Intent  intent = new Intent(Intent.ACTION_VIEW);
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            //添加这一句表示对目标应用临时授权
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                            Uri apkurl = FileProvider.getUriForFile(MainActivity.this,
+                                    getPackageName()+".fileprovider",file);
+                            intent.setDataAndType(apkurl, "application/vnd.android.package-archive");
+
+                        }else {
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.setDataAndType(Uri.fromFile(file),
+                                    "application/vnd.android.package-archive");
+                        }
+
+                        startActivity(intent);
+
+
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        progressDialog.dismiss();
+                    }
+                });
+
+
+    }
+
+
+
+
+
+
+    /**
+     * 下载apk
+     * 由于可能需要不同网络环境，对应不同下载情况
+     * 这个就没加网络限制，需要自己外部检查是什么网络
+     */
+    private void Download() {
+        String url = "http://47.97.223.94/apk/日本城_1.2.apk";
+        final String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+        final String fileName = "bullet" + ".apk";
+
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("下载中...");
+        progressDialog.setMax(100);
+
+
+
+        RetrofitFactory.getInstance()
+                .getDownload(url)
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        Log.d(TAG, "accept: ");
+                        progressDialog.show();
+                    }
+                })
                 .doOnNext(new BaseDownload(MainActivity.this, fileDir, fileName) {
                     @Override
                     public void inProgress(float progress) {
+                        Log.d(TAG, "inProgress: "+progress);
                         progressDialog.setProgress((int) (100 * progress));
                     }
                 })
@@ -244,18 +330,38 @@ public class MainActivity extends Activity {
                     public void onSubscribe(Disposable d) {
                         Log.d(TAG, "onSubscribe: ");
                     }
-
                     @Override
                     public void onNext(ResponseBody responseBody) {
                         progressDialog.dismiss();
-                        Log.d(TAG, "onNext: ");
-                        String dirPath = fileDir + "/" + fileName; //文件需有可读权限
-                        Log.d(TAG, "onResponse: "+dirPath);
-                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-                        //intent.setAction(android.content.Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse("file://" + dirPath), "application/vnd.android.package-archive");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        Log.d(TAG, "onNext: ");
+//                        String dirPath = fileDir + "/" + fileName; //文件需有可读权限
+//                        Log.d(TAG, "onResponse: "+dirPath);
+//                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+//                        //intent.setAction(android.content.Intent.ACTION_VIEW);
+//                        intent.setDataAndType(Uri.parse("file://" + dirPath), "application/vnd.android.package-archive");
+//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        startActivity(intent);
+
+
+                        File file = new File(fileDir,fileName);
+                        Intent  intent = new Intent(Intent.ACTION_VIEW);
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            //添加这一句表示对目标应用临时授权
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                            Uri apkurl = FileProvider.getUriForFile(MainActivity.this,
+                                    getPackageName()+".fileprovider",file);
+                            intent.setDataAndType(apkurl, "application/vnd.android.package-archive");
+
+                        }else {
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.setDataAndType(Uri.fromFile(file),
+                                    "application/vnd.android.package-archive");
+                        }
+
                         startActivity(intent);
+
                     }
 
                     @Override

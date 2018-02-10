@@ -54,6 +54,7 @@ public class FTP {
         this.userName = "emallftp";
         this.password = "ftp858500";
         this.ftpClient = new FTPClient();
+        ftpClient.setBufferSize(1024*1024);
     }
 
     // -------------------------------------------------------文件上传方法------------------------------------------------

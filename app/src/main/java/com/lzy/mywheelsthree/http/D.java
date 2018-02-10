@@ -1,7 +1,5 @@
 package com.lzy.mywheelsthree.http;
 
-
-import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
@@ -9,16 +7,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import okhttp3.ResponseBody;
 
 /**
- * Created by zidan on 2017/10/12.
+ * Created by bullet on 2018/2/6.
  */
 
-public abstract class BaseDownload implements Consumer<ResponseBody> {
-    private static final String TAG = "BaseDownload";
-
+public abstract class D implements Function<ResponseBody, File> {
+    private static final String TAG = "D";
     /**
      * 目标文件存储的文件夹路径
      */
@@ -29,34 +26,22 @@ public abstract class BaseDownload implements Consumer<ResponseBody> {
     private String destFileName;
 
 
-    private Context mContext;
-
-
-
-    public BaseDownload(Context context, String destFileDir , String destFileName ) {
-        this.mContext=context;
+    public D(String destFileDir, String destFileName) {
         this.destFileDir = destFileDir;
         this.destFileName = destFileName;
-
     }
+
+
 
     @Override
-    public void accept(ResponseBody responseBody) throws Exception {
-        Log.d(TAG, "accept: ");
-        saveFile(responseBody);
-        onHandleSuccess();
+    public File apply(ResponseBody t) throws Exception {
+
+        Log.d(TAG, "apply: ");
+        return saveFile(t);
+        
+        
     }
-
-    //成功返回值
-    public void onHandleSuccess(){
-
-    }
-
-
-    public  void inProgress(float progress){}
-
-
-
+    public abstract void inProgress(float progress);
 
     public File saveFile(ResponseBody response) throws IOException {
         InputStream is = null;
@@ -117,6 +102,5 @@ public abstract class BaseDownload implements Consumer<ResponseBody> {
 
         }
     }
-
 
 }
