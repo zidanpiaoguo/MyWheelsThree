@@ -1,5 +1,6 @@
 package com.lzy.mywheelsthree;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
@@ -67,6 +69,8 @@ public class MainActivity extends Activity {
 
     private void init() {
 
+        SetPermissions();
+
 //        LoadingDialog.showDialogForLoading(this);
         text.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,6 +95,9 @@ public class MainActivity extends Activity {
 //        //一次性请求
 //        BasicRequest();
 
+
+
+
         Download1();
 
 //        //下载请求
@@ -103,6 +110,24 @@ public class MainActivity extends Activity {
 //        uploadImageText();
 
 
+    }
+
+
+
+
+    private void SetPermissions(){
+        String permissions[] = new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        int code[] = new int[]{ 100};
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+
+            for (int i = 0; i < permissions.length; i++) {
+
+                if (ContextCompat.checkSelfPermission(this, permissions[i]) != 0) {
+                    requestPermissions(permissions, code[i]);
+                }
+            }
+        }
     }
 
     private void uploadImageText() {
@@ -219,7 +244,10 @@ public class MainActivity extends Activity {
 
     private void Download1(){
 
-        String url = "http://47.97.223.94/apk/日本城_1.2.apk";
+
+
+        String url = "http://106.14.249.176:8080/app/freebuy.apk";
+//        String url = "http://47.97.223.94/apk/日本城_1.2.1.apk";
         final String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath();
         final String fileName = "bullet" + ".apk";
 
@@ -251,6 +279,7 @@ public class MainActivity extends Activity {
                 .subscribe(new Consumer<File>() {
                     @Override
                     public void accept(File file) throws Exception {
+                        Log.d(TAG, "accept: "+"oK");
                         progressDialog.dismiss();
 
 //                        String dirPath = file.getAbsolutePath(); //文件需有可读权限
@@ -268,6 +297,7 @@ public class MainActivity extends Activity {
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.setDataAndType(Uri.fromFile(file),
                                     "application/vnd.android.package-archive");
+                            Log.d(TAG, "accept: "+"进来了");
                         }
 
                         startActivity(intent);
@@ -277,12 +307,15 @@ public class MainActivity extends Activity {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
+                        Log.d(TAG, "accept: "+"Error");
                         progressDialog.dismiss();
                     }
                 });
 
 
     }
+
+
 
 
 

@@ -13,6 +13,7 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.fastjson.FastJsonConverterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -62,7 +63,10 @@ public class RetrofitFactory {
 
     private static RetrofitService retrofitService = new Retrofit.Builder()
             .baseUrl(BASE_URL)
+
             .addConverterFactory(GsonConverterFactory.create(buildGson()))
+            //用fastjson解析
+//            .addConverterFactory(FastJsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(httpClient)
             .build()

@@ -45,7 +45,7 @@ public abstract class D implements Function<ResponseBody, File> {
 
     public File saveFile(ResponseBody response) throws IOException {
         InputStream is = null;
-        byte[] buf = new byte[1024*1024];
+        byte[] buf = new byte[4096];
         int len = 0;
         FileOutputStream fos = null;
         try {

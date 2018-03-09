@@ -9,6 +9,7 @@ import io.reactivex.disposables.Disposable;
 
 public class RxManage {
     private CompositeDisposable mComposable = new CompositeDisposable();
+
     public void register(Disposable disposable){
 
         mComposable.add(disposable);
